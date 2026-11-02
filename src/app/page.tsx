@@ -16,6 +16,9 @@ import {
   UpcomingEventsSection,
   GallerySection,
 } from "@/components/home/homeSections";
+import NewsletterSection from "@/components/home/NewsletterSection";
+import Footer from "@/components/layout/Footer";
+
 
 const impactStats = [
   {
@@ -210,8 +213,10 @@ export default function Home() {
         </div>
       </section>
       <FeaturesSection />
-<UpcomingEventsSection />
-<GallerySection />
+      <UpcomingEventsSection />
+      <GallerySection />
+      <NewsletterSection />
+      <Footer />
     </main>
   );
 }
