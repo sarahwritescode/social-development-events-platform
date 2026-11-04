@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 
 const navLinks = [
   { name: "Home", href: "/" },
-  { name: "Upcoming Events", href: "/upcoming-events" },
+  { name: "Upcoming Events", href: "/UpcomingEventsSection" },
 ];
 
 export default function Navbar() {
@@ -99,7 +99,7 @@ export default function Navbar() {
 
           {user && (
             <Link
-              href="/create-event"
+              href="/creat-event"
               className="flex items-center gap-2 text-sm font-semibold text-[#526157] transition hover:text-[#245c45] dark:text-[#c3d0c5]"
             >
               <CalendarDays size={16} />
@@ -204,7 +204,7 @@ export default function Navbar() {
 
             {user && (
               <Link
-                href="/create-event"
+                href="/creat-event"
                 onClick={closeMenu}
                 className="flex items-center gap-2 text-sm font-semibold text-[#245c45] dark:text-white"
               >

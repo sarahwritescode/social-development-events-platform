@@ -11,11 +11,9 @@ import {
   Sparkles,
 } from "lucide-react";
 import Navbar from "../components/layout/navbar";
-import {
-  FeaturesSection,
-  UpcomingEventsSection,
-  GallerySection,
-} from "@/components/home/homeSections";
+import FeaturesSection from "@/components/home/FeaturesSection";
+import UpcomingEventsSection from "@/components/home/UpcomingEventsSection";
+import GallerySection from "@/components/home/GallerySection";
 import NewsletterSection from "@/components/home/NewsletterSection";
 import Footer from "@/components/layout/Footer";
 
