@@ -16,6 +16,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { toast } from "@/components/toast/toast";
 
 const eventTypes = [
   "Cleanup",
@@ -100,7 +101,7 @@ export default function CreateEventPage() {
         throw new Error(data.message || "Failed to create event");
       }
 
-      alert("Event created successfully!");
+      toast.success("Event created successfully!");
       router.push("/");
       router.refresh();
     } catch (err) {
