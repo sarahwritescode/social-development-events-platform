@@ -46,14 +46,14 @@ Kindora is a community events platform for discovering local initiatives, joinin
    npm run dev
    ```
 
-5. Open [http://localhost:3000](http://localhost:3000).
+5. Open  https://social-development-events-platform-5093ogeam-acme-343a.vercel.app/
 
 ## Environment variables
 
 | Variable | Purpose | Example for local development |
 | --- | --- | --- |
 | `BETTER_AUTH_SECRET` | Secret used by Better Auth to sign and secure authentication data. Use a long, unique random value. | Generate a private random secret; do not use the example text as a value. |
-| `BETTER_AUTH_URL` | Base URL where the Better Auth endpoints are served. | `http://localhost:3000` |
+| `BETTER_AUTH_URL` | Base URL where the Better Auth endpoints are served. | `https://social-development-events-platform-5093ogeam-acme-343a.vercel.app/` |
 | `MONGODB_URI` | MongoDB connection string used by Better Auth. The application stores Better Auth data in the `kindora-project` database. | `mongodb://127.0.0.1:27017` |
 | `NEXT_PUBLIC_API_URL` | Base URL for the separate event API. | `http://localhost:5000` |
 
