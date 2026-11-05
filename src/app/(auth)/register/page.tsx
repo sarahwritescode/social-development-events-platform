@@ -25,6 +25,7 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [image, setImage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -40,6 +41,7 @@ export default function RegisterPage() {
         name,
         email,
         password,
+        image: image.trim() || undefined,
       });
 
       if (error) {
@@ -77,6 +79,7 @@ export default function RegisterPage() {
 
         <CardContent>
           <form onSubmit={handleRegister} className="space-y-5">
+
             <div className="space-y-2">
               <Label htmlFor="name">Full name</Label>
               <Input
@@ -86,6 +89,21 @@ export default function RegisterPage() {
                 onChange={(e) => setName(e.target.value)}
                 required
               />
+            </div>
+
+            {/* Profile Image URL */}
+            <div className="space-y-2">
+              <Label htmlFor="image">Profile Image URL (Optional)</Label>
+              <Input
+                id="image"
+                type="url"
+                placeholder="https://example.com/profile.jpg"
+                value={image}
+                onChange={(e) => setImage(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Add a link to your profile picture.
+              </p>
             </div>
 
             <div className="space-y-2">

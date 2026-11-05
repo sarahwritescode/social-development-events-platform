@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -13,6 +13,8 @@ import {
   ArrowUpRight,
   LogOut,
   CalendarDays,
+  User,
+  ChevronDown,
 } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
@@ -20,7 +22,6 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
-  { name: "Home", href: "/" },
   { name: "Upcoming Events", href: "/upcoming-events" },
 ];
 
@@ -28,6 +29,9 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const profileRef = useRef<HTMLDivElement>(null);
 
   const { user, isPending } = useAuth();
   const router = useRouter();
@@ -38,6 +42,24 @@ export default function Navbar() {
     setIsDark(nextTheme);
     document.documentElement.classList.toggle("dark", nextTheme);
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
+        setIsProfileOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Logout
   const handleLogout = async () => {
@@ -51,7 +73,9 @@ export default function Navbar() {
         return;
       }
 
+      setIsProfileOpen(false);
       setIsMenuOpen(false);
+
       router.push("/");
       router.refresh();
     } catch (error) {
@@ -61,7 +85,114 @@ export default function Navbar() {
     }
   };
 
-  const closeMenu = () => setIsMenuOpen(false);
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+    setIsProfileOpen(false);
+  };
+
+  // Avatar fallback
+  const avatarLetter =
+    user?.name?.charAt(0)?.toUpperCase() || "U";
+
+  // Reusable avatar dropdown JSX
+  const profileMenu = (
+    <div ref={profileRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setIsProfileOpen((prev) => !prev)}
+        aria-label="Open profile menu"
+        aria-expanded={isProfileOpen}
+        className="flex items-center gap-2 rounded-full p-1 transition hover:bg-[#e8eee5] dark:hover:bg-[#30483d]"
+      >
+        {user?.image ? (
+          <img
+            src={user.image}
+            alt={user.name || "User avatar"}
+            className="h-10 w-10 rounded-full border-2 border-[#245c45] object-cover"
+          />
+        ) : (
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#245c45] bg-[#e8eee5] text-sm font-bold text-[#245c45] dark:bg-[#30483d] dark:text-white">
+            {avatarLetter}
+          </div>
+        )}
+
+        <ChevronDown
+          size={16}
+          className={`text-[#245c45] transition-transform dark:text-white ${isProfileOpen ? "rotate-180" : ""
+            }`}
+        />
+      </button>
+
+      {isProfileOpen && (
+        <div className="absolute right-0 top-14 z-[60] w-56 overflow-hidden rounded-xl border border-[#e5e9e1] bg-white shadow-xl dark:border-[#30483d] dark:bg-[#14271f]">
+
+          {/* User Information */}
+          <div className="border-b border-[#e5e9e1] px-4 py-3 dark:border-[#30483d]">
+            <p className="truncate text-sm font-bold text-[#245c45] dark:text-white">
+              {user?.name}
+            </p>
+
+            <p className="truncate text-xs text-gray-500">
+              {user?.email}
+            </p>
+          </div>
+
+
+          {/* Dropdown Links */}
+          <div className="p-2">
+
+            <Link
+              href="/creat-event"
+              onClick={closeMenu}
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#526157] transition hover:bg-[#e8eee5] dark:text-white dark:hover:bg-[#30483d]"
+            >
+              <CalendarDays size={17} />
+              Create Event
+            </Link>
+
+            <Link
+              href="/manage-events"
+              onClick={closeMenu}
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#526157] transition hover:bg-[#e8eee5] dark:text-white dark:hover:bg-[#30483d]"
+            >
+              <CalendarDays size={17} />
+              Manage Events
+            </Link>
+
+            <Link
+              href="/joined-events"
+              onClick={closeMenu}
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#526157] transition hover:bg-[#e8eee5] dark:text-white dark:hover:bg-[#30483d]"
+            >
+              <HeartHandshake size={17} />
+              Joined Events
+            </Link>
+
+            <Link
+              href="/profile"
+              onClick={closeMenu}
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#526157] transition hover:bg-[#e8eee5] dark:text-white dark:hover:bg-[#30483d]"
+            >
+              <User size={17} />
+              My Profile
+            </Link>
+
+            <button
+              type="button"
+              disabled={isLoggingOut}
+              onClick={handleLogout}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:hover:bg-red-950"
+            >
+              <LogOut size={17} />
+              {isLoggingOut ? "Logging out..." : "Logout"}
+            </button>
+
+          </div>
+
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#e5e9e1] bg-[#f7f8f4]/95 backdrop-blur-xl dark:border-[#30483d] dark:bg-[#14271f]/95">
@@ -69,7 +200,13 @@ export default function Navbar() {
       <nav className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-5 lg:px-8">
 
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5">
+        <Link
+          onClick={() =>
+            window.scrollTo({ top: 0, behavior: "smooth" })
+          }
+          href="/"
+          className="flex items-center gap-2.5"
+        >
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#245c45] text-white">
             <HeartHandshake size={23} />
           </div>
@@ -87,6 +224,7 @@ export default function Navbar() {
 
         {/* Desktop Navigation */}
         <div className="hidden items-center gap-9 md:flex">
+
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -123,21 +261,7 @@ export default function Navbar() {
 
           {!isPending && (
             user ? (
-              <div className="flex items-center gap-3">
-                <span className="max-w-[150px] truncate text-sm font-semibold text-[#245c45] dark:text-[#edf5ec]">
-                  Hi, {user.name}
-                </span>
-
-                <Button
-                  variant="outline"
-                  disabled={isLoggingOut}
-                  onClick={handleLogout}
-                  className="rounded-full"
-                >
-                  <LogOut size={16} />
-                  {isLoggingOut ? "Logging out..." : "Logout"}
-                </Button>
-              </div>
+              profileMenu
             ) : (
               <>
                 <Link
@@ -172,6 +296,8 @@ export default function Navbar() {
             {isDark ? <Sun size={19} /> : <Moon size={19} />}
           </Button>
 
+          {!isPending && user && profileMenu}
+
           <Button
             variant="ghost"
             size="icon"
@@ -183,6 +309,7 @@ export default function Navbar() {
             {isMenuOpen ? <X size={21} /> : <Menu size={21} />}
           </Button>
         </div>
+
       </nav>
 
       {/* Mobile Menu */}
@@ -213,50 +340,33 @@ export default function Navbar() {
               </Link>
             )}
 
-            <div className="flex flex-col gap-3 border-t border-[#e5e9e1] pt-4 dark:border-[#30483d]">
+            {!isPending && !user && (
+              <div className="flex flex-col gap-3 border-t border-[#e5e9e1] pt-4 dark:border-[#30483d]">
 
-              {!isPending && (
-                user ? (
-                  <>
-                    <p className="text-sm font-semibold text-[#245c45] dark:text-white">
-                      Hi, {user.name}
-                    </p>
+                <Link
+                  href="/login"
+                  onClick={closeMenu}
+                  className="inline-flex h-9 w-full items-center justify-center rounded-full border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent"
+                >
+                  Login
+                </Link>
 
-                    <Button
-                      variant="outline"
-                      disabled={isLoggingOut}
-                      onClick={handleLogout}
-                      className="w-full rounded-full"
-                    >
-                      <LogOut size={16} />
-                      {isLoggingOut ? "Logging out..." : "Logout"}
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      href="/login"
-                      onClick={closeMenu}
-                      className="inline-flex h-9 w-full items-center justify-center rounded-full border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
-                    >
-                      Login
-                    </Link>
+                <Link
+                  href="/register"
+                  onClick={closeMenu}
+                  className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-full bg-[#245c45] px-4 py-2 text-sm font-medium text-white hover:bg-[#183d32]"
+                >
+                  Join Kindora
+                  <ArrowUpRight size={16} />
+                </Link>
 
-                    <Link
-                      href="/register"
-                      onClick={closeMenu}
-                      className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-full bg-[#245c45] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#183d32]"
-                    >
-                      Join Kindora
-                      <ArrowUpRight size={16} />
-                    </Link>
-                  </>
-                )
-              )}
-            </div>
+              </div>
+            )}
+
           </div>
         </div>
       )}
+
     </header>
   );
 }
