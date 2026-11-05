@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const isProtectedRoute = pathname.startsWith("/create-event");
+  const isProtectedRoute = pathname.startsWith("/creat-event");
 
   if (!isProtectedRoute) {
     return NextResponse.next();
@@ -37,5 +37,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/create-event/:path*"],
+  matcher: ["/creat-event/:path*"],
 };

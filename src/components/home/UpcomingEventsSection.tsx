@@ -412,7 +412,7 @@ export default function UpcomingEventsSection() {
             </p>
 
             <Link
-              href="/create-event"
+              href="/creat-event"
               className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#245c45] px-6 py-3 font-bold text-white transition hover:bg-[#183d32]"
             >
               Create an Event <ArrowUpRight size={17} />

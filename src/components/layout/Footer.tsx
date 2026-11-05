@@ -12,7 +12,7 @@ const footerLinks = {
   Explore: [
     { label: "Home", href: "/" },
     { label: "Upcoming Events", href: "/upcoming-events" },
-    { label: "Create an Event", href: "/create-event" },
+    { label: "Create an Event", href: "/creat-event" },
   ],
   Community: [
     { label: "Our Mission", href: "/#features" },

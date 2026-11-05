@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { Suspense, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { getJwtToken } from "@/lib/auth-client";
 
@@ -36,7 +36,7 @@ interface EventForm {
   eventDate: string;
 }
 
-export default function CreateEventPage() {
+function CreateEventContent() {
   const router = useRouter();
 
   const [form, setForm] = useState<EventForm>({
@@ -51,10 +51,8 @@ export default function CreateEventPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Local date format: YYYY-MM-DD
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-
   const minDate = [
     tomorrow.getFullYear(),
     String(tomorrow.getMonth() + 1).padStart(2, "0"),
@@ -247,5 +245,19 @@ export default function CreateEventPage() {
         </Card>
       </div>
     </main>
+  );
+}
+
+export default function CreateEventPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-[#10291f] text-white">
+          Loading event form...
+        </main>
+      }
+    >
+      <CreateEventContent />
+    </Suspense>
   );
 }

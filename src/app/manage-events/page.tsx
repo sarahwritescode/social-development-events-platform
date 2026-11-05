@@ -53,7 +53,7 @@ export default function ManageEventsPage() {
 
     useEffect(() => {
         if (!isPending && !session) {
-            router.push("/sign-in");
+            router.push("/login");
         }
     }, [isPending, session, router]);
 
@@ -288,7 +288,7 @@ export default function ManageEventsPage() {
                     </p>
 
                     <button
-                        onClick={() => router.push("/create-event")}
+                        onClick={() => router.push("/creat-event")}
                         className="mt-6 rounded-full bg-[#315c3b] px-7 py-3 text-sm font-semibold text-white transition hover:bg-[#24452e]"
                     >
                         Create Your First Event

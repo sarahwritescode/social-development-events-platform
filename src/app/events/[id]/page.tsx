@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -28,7 +28,7 @@ interface Event {
   createdBy: string;
 }
 
-export default function EventDetailsPage() {
+function EventDetailsContent() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
 
@@ -75,7 +75,7 @@ export default function EventDetailsPage() {
   // Join event
   const handleJoin = async () => {
     if (!session?.user) {
-      router.push("/sign-in");
+      router.push("/login");
       return;
     }
 
@@ -256,5 +256,19 @@ export default function EventDetailsPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function EventDetailsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[#14271f] text-white">
+          <Loader2 className="animate-spin" size={35} />
+        </div>
+      }
+    >
+      <EventDetailsContent />
+    </Suspense>
   );
 }

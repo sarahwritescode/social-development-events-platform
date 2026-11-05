@@ -94,7 +94,7 @@ export default function Home() {
               </Link>
 
               <Link
-                href="/create-event"
+                href="/creat-event"
                 className="flex items-center gap-2 rounded-full border border-[#d6dfd3] px-7 py-4 text-sm font-bold text-[#245c45] transition hover:bg-[#e8eee5] dark:border-[#40574a] dark:text-[#e4eee2] dark:hover:bg-[#30483d]"
               >
                 Start an Initiative
@@ -218,4 +218,3 @@ export default function Home() {
     </main>
   );
 }
-

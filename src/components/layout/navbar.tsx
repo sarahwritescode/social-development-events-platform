@@ -25,27 +25,28 @@ const navLinks = [
   { name: "Upcoming Events", href: "/upcoming-events" },
 ];
 
-export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
+type AuthUser = typeof authClient.$Infer.Session.user;
 
+function ProfileMenu({
+  user,
+  isLoggingOut,
+  logoutError,
+  onLogout,
+  onNavigate,
+  onToggle,
+}: {
+  user: AuthUser;
+  isLoggingOut: boolean;
+  logoutError: string;
+  onLogout: () => Promise<boolean>;
+  onNavigate: () => void;
+  onToggle: () => void;
+}) {
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
-  const { user, isPending } = useAuth();
-  const router = useRouter();
-
-  // Theme toggle
-  const toggleTheme = () => {
-    const nextTheme = !isDark;
-    setIsDark(nextTheme);
-    document.documentElement.classList.toggle("dark", nextTheme);
-  };
-
-  // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handlePointerDown = (event: PointerEvent) => {
       if (
         profileRef.current &&
         !profileRef.current.contains(event.target as Node)
@@ -54,57 +55,39 @@ export default function Navbar() {
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsProfileOpen(false);
+      }
+    };
 
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
-  // Logout
-  const handleLogout = async () => {
-    setIsLoggingOut(true);
-
-    try {
-      const { error } = await authClient.signOut();
-
-      if (error) {
-        console.error("Logout failed:", error.message);
-        return;
-      }
-
-      setIsProfileOpen(false);
-      setIsMenuOpen(false);
-
-      router.push("/");
-      router.refresh();
-    } catch (error) {
-      console.error("Logout failed:", error);
-    } finally {
-      setIsLoggingOut(false);
-    }
-  };
-
   const closeMenu = () => {
-    setIsMenuOpen(false);
     setIsProfileOpen(false);
+    onNavigate();
   };
+  const avatarLetter = user.name?.charAt(0)?.toUpperCase() || "U";
 
-  // Avatar fallback
-  const avatarLetter =
-    user?.name?.charAt(0)?.toUpperCase() || "U";
-
-  // Reusable avatar dropdown JSX
-  const profileMenu = (
+  return (
     <div ref={profileRef} className="relative">
       <button
         type="button"
-        onClick={() => setIsProfileOpen((prev) => !prev)}
+        onClick={() => {
+          onToggle();
+          setIsProfileOpen((previous) => !previous);
+        }}
         aria-label="Open profile menu"
         aria-expanded={isProfileOpen}
         className="flex items-center gap-2 rounded-full p-1 transition hover:bg-[#e8eee5] dark:hover:bg-[#30483d]"
       >
-        {user?.image ? (
+        {user.image ? (
           <img
             src={user.image}
             alt={user.name || "User avatar"}
@@ -118,29 +101,22 @@ export default function Navbar() {
 
         <ChevronDown
           size={16}
-          className={`text-[#245c45] transition-transform dark:text-white ${isProfileOpen ? "rotate-180" : ""
-            }`}
+          className={`text-[#245c45] transition-transform dark:text-white ${
+            isProfileOpen ? "rotate-180" : ""
+          }`}
         />
       </button>
 
       {isProfileOpen && (
         <div className="absolute right-0 top-14 z-[60] w-56 overflow-hidden rounded-xl border border-[#e5e9e1] bg-white shadow-xl dark:border-[#30483d] dark:bg-[#14271f]">
-
-          {/* User Information */}
           <div className="border-b border-[#e5e9e1] px-4 py-3 dark:border-[#30483d]">
             <p className="truncate text-sm font-bold text-[#245c45] dark:text-white">
-              {user?.name}
+              {user.name}
             </p>
-
-            <p className="truncate text-xs text-gray-500">
-              {user?.email}
-            </p>
+            <p className="truncate text-xs text-gray-500">{user.email}</p>
           </div>
 
-
-          {/* Dropdown Links */}
           <div className="p-2">
-
             <Link
               href="/creat-event"
               onClick={closeMenu}
@@ -180,19 +156,80 @@ export default function Navbar() {
             <button
               type="button"
               disabled={isLoggingOut}
-              onClick={handleLogout}
+              onClick={async () => {
+                if (await onLogout()) setIsProfileOpen(false);
+              }}
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:hover:bg-red-950"
             >
               <LogOut size={17} />
               {isLoggingOut ? "Logging out..." : "Logout"}
             </button>
-
           </div>
 
+          {logoutError && (
+            <p
+              role="alert"
+              className="border-t border-red-100 px-4 py-3 text-xs text-red-600 dark:border-red-900"
+            >
+              {logoutError}
+            </p>
+          )}
         </div>
       )}
     </div>
   );
+}
+
+export default function Navbar() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
+
+  const { user, isPending } = useAuth();
+  const router = useRouter();
+
+  // Theme toggle
+  const toggleTheme = () => {
+    const nextTheme = !isDark;
+    setIsDark(nextTheme);
+    document.documentElement.classList.toggle("dark", nextTheme);
+  };
+
+  // Logout
+  const handleLogout = async (): Promise<boolean> => {
+    setIsLoggingOut(true);
+    setLogoutError("");
+
+    try {
+      const { error } = await authClient.signOut();
+
+      if (error) {
+        setLogoutError(error.message || "Unable to log out. Please try again.");
+        return false;
+      }
+
+      setIsMenuOpen(false);
+
+      router.replace("/");
+      router.refresh();
+      return true;
+    } catch (error) {
+      console.error("Logout failed:", error);
+      setLogoutError(
+        error instanceof Error
+          ? error.message
+          : "Unable to log out. Please try again."
+      );
+      return false;
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#e5e9e1] bg-[#f7f8f4]/95 backdrop-blur-xl dark:border-[#30483d] dark:bg-[#14271f]/95">
@@ -261,7 +298,14 @@ export default function Navbar() {
 
           {!isPending && (
             user ? (
-              profileMenu
+              <ProfileMenu
+                user={user}
+                isLoggingOut={isLoggingOut}
+                logoutError={logoutError}
+                onLogout={handleLogout}
+                onNavigate={closeMenu}
+                onToggle={() => setLogoutError("")}
+              />
             ) : (
               <>
                 <Link
@@ -296,7 +340,16 @@ export default function Navbar() {
             {isDark ? <Sun size={19} /> : <Moon size={19} />}
           </Button>
 
-          {!isPending && user && profileMenu}
+          {!isPending && user && (
+            <ProfileMenu
+              user={user}
+              isLoggingOut={isLoggingOut}
+              logoutError={logoutError}
+              onLogout={handleLogout}
+              onNavigate={closeMenu}
+              onToggle={() => setLogoutError("")}
+            />
+          )}
 
           <Button
             variant="ghost"
